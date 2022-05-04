@@ -63,10 +63,9 @@ kubectl apply -f kic/expose-kong-proxy.yaml
 
 This step doesn't affect the deployment, it is just to avoid the Health check errors.
 
-It seems that the current version of Lua that uses the proxy containers doesn't support HTTP/2.0 and this error keeps
-showing up in the logs
+The proxy container logs keep showing the following error:
 
-```
+```bash
 127.0.0.1 - - [29/Apr/2022:08:42:59 +0000] "GET /status HTTP/2.0" 500 42 "-" "Go-http-client/2.0"
 2022/04/29 08:43:02 [error] 2073#0: *135 [lua] api_helpers.lua:526: handle_error(): /usr/local/share/lua/5.1/lapis/application.lua:424: /usr/local/share/lua/5.1/kong/api/routes/health.lua:52: http2 requests not supported yet
 stack traceback:
@@ -75,6 +74,9 @@ stack traceback:
        /usr/local/share/lua/5.1/kong/api/api_helpers.lua:293: in function 'fn'
         /usr/local/share/lua/5.1/kong/api/api_helpers.lua:293: in function </usr/local/share/lua/5.1/kong/api/api_helpers.lua:276>
 ```
+
+The problem is tracked in [#Issue 2435](https://github.com/Kong/kubernetes-ingress-controller/issues/2435)
+and addressed in [#Pull 8690](https://github.com/Kong/kong/pull/8690)
 
 To avoid this error we can patch the deployment to not use HTTP/2.0
 
